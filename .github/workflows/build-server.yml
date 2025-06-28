@@ -47,6 +47,23 @@ jobs:
           build-args: |
             BUILDKIT_INLINE_CACHE=1
       
+      # Clone ArgoCD apps repository
+      - name: Clone ArgoCD apps repository
+        run: |
+          git clone https://amarthyanathb:${{ secrets.PAT_TOKEN }}@github.com/amarthyanathb/argo-apps.git
+          cd argo-apps
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+      
+      # Update backend deployment image tag
+      - name: Update backend deployment image tag
+        run: |
+          cd argo-apps
+          sed -i "s|image: amarthyanath/cybersapient-backend:.*|image: amarthyanath/cybersapient-backend:${{ env.SHORT_SHA }}|g" backend/deployment.yaml
+          git add backend/deployment.yaml
+          git commit -m "Update backend image tag to ${{ env.SHORT_SHA }}"
+          git push
+      
       # Optional: Clean up
       - name: Clean up
         run: |
